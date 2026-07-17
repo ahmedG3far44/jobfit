@@ -70,16 +70,16 @@ function SectionEditor({ name, content, placeholder, onChange }: SectionEditorPr
       <div className="flex items-center justify-between bg-muted/50 px-4 py-2">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{name}</span>
         {!editing ? (
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
-            <Pencil className="h-3 w-3" />
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditing(true)}>
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
         ) : (
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSave} disabled={!hasChanges}>
-              <Save className="h-3 w-3" />
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSave} disabled={!hasChanges}>
+              <Save className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={handleCancel}>
-              <X className="h-3 w-3" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={handleCancel}>
+              <X className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
@@ -150,7 +150,7 @@ export function ResumeEditor({
             <X className="mr-1 h-4 w-4" />
             Cancel
           </Button>
-          <Button size="sm" onClick={() => onSave(result)}>
+          <Button onClick={() => onSave(result)}>
             <Save className="mr-1 h-4 w-4" />
             Save Changes
           </Button>

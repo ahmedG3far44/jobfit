@@ -49,14 +49,14 @@ export function ResumeDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/resumes')}>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/resumes')} className="shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">{resume.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold truncate">{resume.title}</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Button variant="outline" onClick={() => navigate(`/resumes/${id}/create-version`)}>
             Create Version
           </Button>
@@ -71,7 +71,7 @@ export function ResumeDetailPage() {
           <CardTitle>Parsed Content</CardTitle>
         </CardHeader>
         <CardContent>
-          <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
+          <pre className="whitespace-pre-wrap break-words overflow-x-auto text-sm text-muted-foreground">
             {resume.parsedContent || 'No content parsed yet.'}
           </pre>
         </CardContent>

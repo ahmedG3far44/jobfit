@@ -13,7 +13,7 @@ import type { ResumeVersion } from '@/types'
 import type { WritingStyle } from '@/lib/writing-styles'
 
 export function CoverLettersPage() {
-  const { token } = useAuth()
+  const { user, token } = useAuth()
   const navigate = useNavigate()
   const [versions, setVersions] = useState<ResumeVersion[]>([])
   const [coverLetters, setCoverLetters] = useState<Record<string, string>>({})
@@ -45,7 +45,9 @@ export function CoverLettersPage() {
         jobTitle: version.jobTitle,
         style,
       }, token)
-      setCoverLetters((prev) => ({ ...prev, [key]: result.content }))
+      const body = result.content.trim()
+      const signature = `\n\nSincerely,\n${user?.name || 'Applicant'}`
+      setCoverLetters((prev) => ({ ...prev, [key]: body + signature }))
       setExpandedId(key)
     } catch {
       // silent
@@ -146,23 +148,23 @@ export function CoverLettersPage() {
             return (
               <Card key={key}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{version.company}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg truncate">{version.company}</CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">
                         {version.jobTitle} &middot; {version.name}
                       </p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 shrink-0">
                       {letter && !isEditing && (
                         <>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditStart(key)}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleEditStart(key)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopy(key, letter)}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleCopy(key, letter)}>
                             {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteLetter(key)}>
+                          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleDeleteLetter(key)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </>
@@ -170,7 +172,7 @@ export function CoverLettersPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-9 w-9"
                         onClick={() => handleGenerate(version)}
                         disabled={generating[key]}
                       >
@@ -228,7 +230,6 @@ export function CoverLettersPage() {
                   ) : (
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => handleGenerate(version)}
                     >
                       Generate Cover Letter
@@ -253,10 +254,10 @@ export function CoverLettersPage() {
             return (
               <Card key={key}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{v.company}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{v.jobTitle} &middot; {v.name}</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg truncate">{v.company}</CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">{v.jobTitle} &middot; {v.name}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -265,7 +266,7 @@ export function CoverLettersPage() {
                     value={styles[key] || 'professional'}
                     onChange={(s) => setStyles((prev) => ({ ...prev, [key]: s }))}
                   />
-                  <Button variant="outline" size="sm" onClick={() => handleGenerate(v)}>
+                  <Button variant="outline" onClick={() => handleGenerate(v)}>
                     Generate Cover Letter
                   </Button>
                 </CardContent>

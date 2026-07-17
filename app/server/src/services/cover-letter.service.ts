@@ -33,6 +33,8 @@ Rules:
 3. Personalize it for ${company} and the ${jobTitle} role.
 4. Reference specific relevant experience from the resume.
 5. Keep it concise (3-4 paragraphs).
+6. Do NOT include phone numbers, email addresses, URLs, or any contact information.
+7. Do NOT include a closing signature at the end.
 
 Resume:
 ${resumeContent}
@@ -41,7 +43,9 @@ Job Description:
 ${jobDescription}
 
 Company: ${company}
-Job Title: ${jobTitle}`;
+Job Title: ${jobTitle}
+
+Write only the body paragraphs. Do not add a salutation like "Dear" or a closing like "Sincerely" or your name.`;
 
   return callOpenRouter(prompt);
 };

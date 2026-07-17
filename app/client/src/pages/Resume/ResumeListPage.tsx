@@ -33,7 +33,7 @@ export function ResumeListPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">My Resumes</h1>
         <Link to="/resumes/new">
           <Button>
@@ -58,16 +58,16 @@ export function ResumeListPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {resumes.map((resume) => (
             <Link key={resume._id} to={`/resumes/${resume._id}`}>
               <Card className="hover:bg-accent transition-colors">
                 <CardHeader>
-                  <CardTitle className="text-lg">{resume.title}</CardTitle>
+                  <CardTitle className="text-lg truncate">{resume.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Created {new Date(resume.createdAt).toLocaleDateString()}
+                    Created {new Date(resume.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </CardContent>
               </Card>

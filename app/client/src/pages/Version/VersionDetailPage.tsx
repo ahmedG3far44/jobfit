@@ -21,7 +21,7 @@ import type { WritingStyle } from '@/lib/writing-styles'
 export function VersionDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { token } = useAuth()
+  const { user, token } = useAuth()
   const { toast } = useToast()
   const [version, setVersion] = useState<ResumeVersion | null>(null)
   const [resume, setResume] = useState<Resume | null>(null)
@@ -102,7 +102,9 @@ export function VersionDetailPage() {
         jobTitle: version.jobTitle,
         style: letterStyle,
       }, token)
-      setCoverLetter(result.content)
+      const body = result.content.trim()
+      const signature = `\n\nSincerely,\n${user?.name || 'Applicant'}`
+      setCoverLetter(body + signature)
       toast('Cover letter generated', 'success')
     } catch {
       toast('Failed to generate cover letter', 'error')
@@ -155,19 +157,19 @@ export function VersionDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/versions')}>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/versions')} className="shrink-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{version.name}</h1>
-            <p className="text-muted-foreground">
-              {version.company} &middot; {version.jobTitle}
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">{version.name}</h1>
+            <p className="text-muted-foreground truncate">
+              {version.company} &middot; {resume?.title || version.jobTitle}
             </p>
           </div>
         </div>
-        <Button variant="destructive" size="icon" onClick={() => setShowDelete(true)}>
+        <Button variant="destructive" size="icon" onClick={() => setShowDelete(true)} className="shrink-0">
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -279,22 +281,22 @@ export function VersionDetailPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Cover Letter</CardTitle>
-            <div className="flex gap-1">
+            <div className="flex gap-1 shrink-0">
               {editingLetter ? (
                 <>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { setEditingLetter(false); setLetterDraft(coverLetter) }}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => { setEditingLetter(false); setLetterDraft(coverLetter) }}>
                     <X className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleSaveEditedLetter}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSaveEditedLetter}>
                     <Save className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setLetterDraft(coverLetter); setEditingLetter(true) }}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setLetterDraft(coverLetter); setEditingLetter(true) }}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCoverLetter('')}>
+                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setCoverLetter('')}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </>
@@ -340,6 +342,7 @@ export function VersionDetailPage() {
                 <ComparisonView
                   originalContent={resume.parsedContent}
                   optimizedContent={aiContent}
+                  jobDescription={version.jobDescription}
                 />
               </div>
             </>

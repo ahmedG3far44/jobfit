@@ -46,7 +46,7 @@ export function ConfirmDialog({
         className="relative z-10 w-full max-w-md rounded-lg border bg-card p-6 shadow-lg"
       >
         <button
-          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
           onClick={onCancel}
         >
           <X className="h-4 w-4" />
@@ -61,12 +61,11 @@ export function ConfirmDialog({
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" size="sm" onClick={onCancel} disabled={loading}>
+          <Button variant="outline" onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button
             variant={variant === 'destructive' ? 'destructive' : 'default'}
-            size="sm"
             onClick={onConfirm}
             disabled={loading}
           >

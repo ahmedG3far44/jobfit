@@ -124,15 +124,16 @@ export function ResumePreview({ content, filename }: {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
           <CardTitle className="text-base">Optimized Resume</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <div className="relative" ref={dropdownRef}>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 disabled={exporting}
+                className="w-full sm:w-auto"
               >
                 {exporting ? (
                   <>
@@ -150,16 +151,16 @@ export function ResumePreview({ content, filename }: {
               {dropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border bg-card shadow-lg">
+                  <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border bg-card shadow-lg sm:right-0 sm:left-auto">
                     <button
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent rounded-t-md"
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent rounded-t-md"
                       onClick={() => { setDropdownOpen(false); setShowPdfModal(true) }}
                     >
                       <FileIcon className="h-4 w-4" />
                       Export as PDF
                     </button>
                     <button
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent rounded-b-md"
+                      className="flex w-full items-center gap-2 px-3 py-2.5 text-sm hover:bg-accent rounded-b-md"
                       onClick={handleExportDocx}
                       disabled={exporting}
                     >
@@ -170,7 +171,7 @@ export function ResumePreview({ content, filename }: {
                 </>
               )}
             </div>
-            <Button variant="outline" size="sm" onClick={handleCopy}>
+            <Button variant="outline" size="sm" onClick={handleCopy} className="w-full sm:w-auto">
               {copied ? (
                 <>
                   <Check className="mr-1 h-4 w-4 text-green-500" />

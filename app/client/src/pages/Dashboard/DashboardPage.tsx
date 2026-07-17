@@ -36,7 +36,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <Link to="/resumes/new">
           <Button>
@@ -46,7 +46,7 @@ export function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Master Resumes</CardTitle>
@@ -96,14 +96,14 @@ export function DashboardPage() {
               <div className="space-y-3">
                 {resumes.map((resume) => (
                   <Link key={resume._id} to={`/resumes/${resume._id}`}>
-                    <div className="flex items-center justify-between rounded-lg border p-3 hover:bg-accent transition-colors">
-                      <div>
-                        <p className="font-medium">{resume.title}</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 hover:bg-accent transition-colors my-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{resume.title}</p>
                         <p className="text-sm text-muted-foreground">
-                          {new Date(resume.createdAt).toLocaleDateString()}
+                          {new Date(resume.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
-                      <Badge variant="secondary">{resume.originalFileUrl ? 'File' : 'Text'}</Badge>
+                      <Badge variant="secondary" className="shrink-0">{resume.originalFileUrl ? 'File' : 'Text'}</Badge>
                     </div>
                   </Link>
                 ))}
@@ -124,16 +124,19 @@ export function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {versions.slice(0, 5).map((version) => (
-                  <Link key={version._id} to={`/versions/${version._id}`}>
-                    <div className="rounded-lg border p-3 hover:bg-accent transition-colors">
-                      <p className="font-medium">{version.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {version.company} &middot; {version.jobTitle}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                {versions.slice(0, 5).map((version) => {
+                  const masterResume = resumes.find((r) => r._id === version.resumeId)
+                  return (
+                    <Link key={version._id} to={`/versions/${version._id}`}>
+                      <div className="rounded-lg border p-3 hover:bg-accent transition-colors my-2">
+                        <p className="font-medium truncate">{version.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {masterResume?.title || version.company}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </CardContent>

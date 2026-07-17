@@ -85,6 +85,8 @@ export function ResumeUploadPage() {
                 onChange={(e) => { setTitle(e.target.value); setTitleError('') }}
                 placeholder="e.g. Frontend Developer Resume"
                 required
+                readOnly={loading}
+                className={loading ? 'opacity-60 cursor-not-allowed' : ''}
               />
               {titleError && <p className="text-xs text-destructive">{titleError}</p>}
             </div>
@@ -92,8 +94,10 @@ export function ResumeUploadPage() {
             <div className="space-y-2">
               <Label>Upload File (PDF, DOCX)</Label>
               <div
-                className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 hover:bg-accent transition-colors"
-                onClick={() => fileInputRef.current?.click()}
+                className={
+                  `flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${loading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-accent'}`
+                }
+                onClick={() => !loading && fileInputRef.current?.click()}
               >
                 <Upload className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-sm font-medium text-foreground">
@@ -108,6 +112,7 @@ export function ResumeUploadPage() {
                   accept=".pdf,.docx,.doc"
                   className="hidden"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -122,7 +127,8 @@ export function ResumeUploadPage() {
                   variant="ghost"
                   size="sm"
                   className="bg-card px-2 text-xs text-muted-foreground"
-                  onClick={() => setShowPaste(!showPaste)}
+                  onClick={() => !loading && setShowPaste(!showPaste)}
+                  disabled={loading}
                 >
                   {showPaste ? <ChevronUp className="mr-1 h-3 w-3" /> : <ChevronDown className="mr-1 h-3 w-3" />}
                   {showPaste ? 'Hide manual input' : 'Or paste content manually'}
@@ -138,7 +144,8 @@ export function ResumeUploadPage() {
                   value={parsedContent}
                   onChange={(e) => setParsedContent(e.target.value)}
                   placeholder="Paste your resume content here... (only needed if you don't upload a file)"
-                  className="min-h-[200px]"
+                  className={`min-h-[200px] ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  readOnly={loading}
                 />
               </div>
             )}

@@ -20,7 +20,7 @@ export function WritingStyleSelector({
           disabled={disabled}
           onClick={() => onChange(style.key)}
           className={cn(
-            'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+            'flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-medium transition-colors',
             value === style.key
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground',

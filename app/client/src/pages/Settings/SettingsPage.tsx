@@ -282,8 +282,8 @@ export function SettingsPage() {
               )}
 
               {contacts.map((contact, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <div className="flex-1">
+                <div key={i} className="flex flex-wrap items-start gap-2">
+                  <div className="flex-1 min-w-[120px]">
                     <Select
                       value={contact.type}
                       onChange={(e) => handleContactChange(i, 'type', e.target.value)}
@@ -292,7 +292,7 @@ export function SettingsPage() {
                       className={!editing ? 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400' : ''}
                     />
                   </div>
-                  <div className="flex-[2]">
+                  <div className="flex-[2] min-w-[180px]">
                     <Input
                       value={contact.value}
                       onChange={(e) => handleContactChange(i, 'value', e.target.value)}
@@ -305,7 +305,7 @@ export function SettingsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="mt-0 h-10 w-10 shrink-0"
+                      className="h-10 w-10 shrink-0"
                       onClick={() => handleRemoveContact(i)}
                     >
                       <X className="h-4 w-4" />
@@ -362,7 +362,7 @@ export function SettingsPage() {
         </Card>
       </div>
 
-      <div className="flex items-center justify-end gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant={editing ? 'outline' : 'default'}
           size="lg"

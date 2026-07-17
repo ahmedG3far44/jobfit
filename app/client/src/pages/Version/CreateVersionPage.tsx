@@ -133,12 +133,12 @@ export function CreateVersionPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="company">Company</Label>
-                <Input id="company" value={company} onChange={(e) => { setCompany(e.target.value); setCompanyError('') }} placeholder="e.g. Google" required />
+                <Input id="company" value={company} onChange={(e) => { setCompany(e.target.value); setCompanyError('') }} placeholder="e.g. Google" required readOnly={generating} className={generating ? 'opacity-60 cursor-not-allowed' : ''} />
                 {companyError && <p className="text-xs text-destructive">{companyError}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="jobTitle">Job Title</Label>
-                <Input id="jobTitle" value={jobTitle} onChange={(e) => { setJobTitle(e.target.value); setJobTitleError('') }} placeholder="e.g. Frontend Developer" required />
+                <Input id="jobTitle" value={jobTitle} onChange={(e) => { setJobTitle(e.target.value); setJobTitleError('') }} placeholder="e.g. Frontend Developer" required readOnly={generating} className={generating ? 'opacity-60 cursor-not-allowed' : ''} />
                 {jobTitleError && <p className="text-xs text-destructive">{jobTitleError}</p>}
               </div>
             </div>
@@ -150,8 +150,9 @@ export function CreateVersionPage() {
                 value={jobDescription}
                 onChange={(e) => { setJobDescription(e.target.value); setJdError('') }}
                 placeholder="Paste the job description here..."
-                className="min-h-[200px]"
+                className={`min-h-[200px] ${generating ? 'opacity-60 cursor-not-allowed' : ''}`}
                 required
+                readOnly={generating}
               />
               {jdError && <p className="text-xs text-destructive">{jdError}</p>}
             </div>
@@ -185,6 +186,7 @@ export function CreateVersionPage() {
           <ComparisonView
             originalContent={resume.parsedContent}
             optimizedContent={aiContent}
+            jobDescription={jobDescription}
           />
 
           {error && (

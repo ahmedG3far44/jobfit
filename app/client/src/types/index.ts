@@ -25,6 +25,19 @@ export interface Resume {
   createdAt: string
 }
 
+export type VersionStatus =
+  | 'applied'
+  | 'screen interview'
+  | 'technical interview'
+  | 'assigned task'
+  | 'assigned assessment'
+  | 'HR interview'
+  | 'tech interview -2'
+  | 'last interview'
+  | 'job offer'
+  | 'hired'
+  | 'rejected'
+
 export interface ResumeVersion {
   _id: string
   resumeId: string
@@ -34,6 +47,7 @@ export interface ResumeVersion {
   jobTitle: string
   jobDescription: string
   aiContent: string
+  status: VersionStatus
   createdAt: string
 }
 
