@@ -22,21 +22,31 @@ export interface Resume {
   title: string
   originalFileUrl: string
   parsedContent: string
+  versionCount?: number
+  versionCompanies?: string[]
   createdAt: string
 }
 
 export type VersionStatus =
-  | 'applied'
-  | 'screen interview'
-  | 'technical interview'
-  | 'assigned task'
-  | 'assigned assessment'
-  | 'HR interview'
-  | 'tech interview -2'
-  | 'last interview'
-  | 'job offer'
-  | 'hired'
-  | 'rejected'
+  | 'Application Viewed'
+  | 'Shortlisted'
+  | 'HR Screening'
+  | 'Recruiter Call'
+  | 'Online Assessment'
+  | 'Home Task'
+  | 'Technical Interview 1'
+  | 'Technical Interview 2'
+  | 'System Design Interview'
+  | 'Hiring Manager Interview'
+  | 'Final Interview'
+  | 'Reference Check'
+  | 'Offer Extended'
+  | 'Offer Accepted'
+  | 'No Response'
+  | 'Rejected'
+  | 'Offer Declined'
+  | 'Withdrawn'
+  | 'Hired'
 
 export interface ResumeVersion {
   _id: string

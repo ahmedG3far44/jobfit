@@ -4,6 +4,7 @@ import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { X, Loader2, Check } from 'lucide-react'
 import { parseResume } from '@/lib/resume-parser'
+import type { User } from '@/types'
 
 type PdfTemplate = 'minimal' | 'modern' | 'classic' | 'compact'
 
@@ -42,50 +43,63 @@ const TEMPLATES: { key: PdfTemplate; name: string; desc: string; style: string; 
   },
 ]
 
-function LargePreview({ content, template }: { content: string; template: typeof TEMPLATES[number] }) {
+const CONTACT_LABELS: Record<string, string> = {
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  portfolio: 'Portfolio',
+  behance: 'Behance',
+  other: 'Link',
+}
+
+function LargePreview({ content, template, user }: { content: string; template: typeof TEMPLATES[number]; user: Pick<User, 'name' | 'phone' | 'email' | 'contacts' | 'globalLocation' | 'localLocation'> | null }) {
   const parsed = useMemo(() => parseResume(content), [content])
-  const sections = parsed.sections.filter((s) => s.content.trim())
+  const sections = parsed.sections.filter((s) => s.content.trim() && s.name !== 'Contact')
+
+  const locationParts: string[] = []
+  if (user?.localLocation) locationParts.push(user.localLocation)
+  if (user?.globalLocation) locationParts.push(user.globalLocation)
+  const links = user?.contacts?.filter((c) => c.value) ?? []
+  const hasLocation = locationParts.length > 0
+  const hasPhone = !!user?.phone
+  const hasEmail = !!user?.email
+  const hasLinks = links.length > 0
 
   return (
     <div className={`${template.style} h-full w-full overflow-y-auto rounded-lg border bg-white p-5 shadow-inner`}>
-      {sections.length === 0 ? (
+      {user?.name && (
+        <div className="mb-4 pb-3 border-b border-gray-300">
+          <div className="text-lg font-bold">{user.name}</div>
+          {(hasLocation || hasPhone || hasEmail || hasLinks) && (
+            <div className="mt-1 text-[10px] text-gray-500">
+              {hasLocation && <span>{locationParts.join(', ')}</span>}
+              {hasLocation && (hasPhone || hasEmail || hasLinks) && <span>  ·  </span>}
+              {hasPhone && <span>{user.phone}</span>}
+              {hasPhone && (hasEmail || hasLinks) && <span>  ·  </span>}
+              {hasEmail && <span>{user.email}</span>}
+              {hasEmail && hasLinks && <span>  ·  </span>}
+              {links.map((c, i) => (
+                <span key={i}>
+                  {i > 0 ? '  ·  ' : ''}
+                  <a href={c.value} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{CONTACT_LABELS[c.type] || c.type}</a>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {sections.length === 0 && !user?.name ? (
         <p className="text-sm text-gray-400 italic">No content to preview</p>
       ) : (
-        sections.map((s) => {
-          if (s.name === 'Contact') {
-            const lines = s.content.split('\n').filter((l) => l.trim())
-            const nameLine = lines[0] || ''
-            const restLines = lines.slice(1)
-            return (
-              <div key={s.name} className="mb-4 last:mb-0">
-                {nameLine && (
-                  <div className="text-lg font-bold mb-1">{nameLine}</div>
-                )}
-                {restLines.length > 0 && (
-                  <div className="space-y-0.5">
-                    {restLines.map((line, i) => {
-                      const urlMatch = line.match(/^(.+?):\s*(https?:\/\/.+)$/)
-                      if (urlMatch) {
-                        return <div key={i} className="text-[11px]">{urlMatch[1].trim()}</div>
-                      }
-                      return <div key={i} className="text-[11px]">{line.trim()}</div>
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-          }
-          return (
-            <div key={s.name} className="mb-3 last:mb-0">
-              <div className={template.sectionClass}>{s.name}</div>
-              <div className={template.bodyClass}>
-                {s.content.split('\n').map((line, i) => (
-                  <div key={i}>{line || '\u00A0'}</div>
-                ))}
-              </div>
+        sections.map((s) => (
+          <div key={s.name} className="mb-3 last:mb-0">
+            <div className={template.sectionClass}>{s.name}</div>
+            <div className={template.bodyClass}>
+              {s.content.split('\n').map((line, i) => (
+                <div key={i}>{line || '\u00A0'}</div>
+              ))}
             </div>
-          )
-        })
+          </div>
+        ))
       )}
     </div>
   )
@@ -94,10 +108,12 @@ function LargePreview({ content, template }: { content: string; template: typeof
 export function ExportPdfModal({
   content,
   filename,
+  user,
   onClose,
 }: {
   content: string
   filename?: string
+  user: Pick<User, 'name' | 'phone' | 'email' | 'contacts' | 'globalLocation' | 'localLocation'> | null
   onClose: () => void
 }) {
   const { token } = useAuth()
@@ -112,7 +128,7 @@ export function ExportPdfModal({
     try {
       await api.download(
         '/export/pdf',
-        { content, filename: filename || 'Optimized Resume', template: selected },
+        { content, filename: filename || 'Optimized Resume', template: selected, user },
         token,
         `${filename || 'optimized-resume'}.pdf`,
       )
@@ -178,7 +194,7 @@ export function ExportPdfModal({
               Preview: <span className="font-medium text-foreground">{selectedTemplate.name}</span>
             </p>
             <div className="flex-1 overflow-hidden rounded-lg border">
-              <LargePreview content={content} template={selectedTemplate} />
+              <LargePreview content={content} template={selectedTemplate} user={user} />
             </div>
           </div>
         </div>

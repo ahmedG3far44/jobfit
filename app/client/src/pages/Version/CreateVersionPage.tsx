@@ -34,6 +34,7 @@ export function CreateVersionPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [a4Optimized, setA4Optimized] = useState(false)
   const [companyError, setCompanyError] = useState('')
   const [jobTitleError, setJobTitleError] = useState('')
   const [jdError, setJdError] = useState('')
@@ -64,7 +65,7 @@ export function CreateVersionPage() {
     setGenerating(true)
     setError('')
     try {
-      const result = await aiApi.fitResume({ resumeId: id, jobDescription }, token)
+      const result = await aiApi.fitResume({ resumeId: id, jobDescription, a4Optimized }, token)
       setAiContent(result.aiContent)
       setStep('preview')
       toast('Resume optimized successfully', 'success')
@@ -148,7 +149,7 @@ export function CreateVersionPage() {
               <Textarea
                 id="jobDescription"
                 value={jobDescription}
-                onChange={(e) => { setJobDescription(e.target.value); setJdError('') }}
+                onChange={(e) => { setJobDescription(e.target.value.trim()); setJdError('') }}
                 placeholder="Paste the job description here..."
                 className={`min-h-[200px] ${generating ? 'opacity-60 cursor-not-allowed' : ''}`}
                 required
@@ -156,6 +157,21 @@ export function CreateVersionPage() {
               />
               {jdError && <p className="text-xs text-destructive">{jdError}</p>}
             </div>
+
+            <label className="flex items-start gap-3 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors">
+              <input
+                type="checkbox"
+                checked={a4Optimized}
+                onChange={(e) => setA4Optimized(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <div className="space-y-0.5">
+                <span className="text-sm font-medium leading-none">A4 Optimized (Single Page)</span>
+                <p className="text-xs text-muted-foreground">
+                  Produces ultra-concise bullet points that fit exactly one A4 page. Prioritizes the most relevant content and removes fluff.
+                </p>
+              </div>
+            </label>
 
             {error && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>

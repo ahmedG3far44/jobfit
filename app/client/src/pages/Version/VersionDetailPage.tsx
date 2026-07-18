@@ -1,175 +1,211 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
-import { useToast } from '@/context/ToastContext'
-import { versionsApi } from '@/lib/api/versions'
-import { resumesApi } from '@/lib/api/resumes'
-import { aiApi } from '@/lib/api/ai'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
-import { ResumePreview } from '@/components/resume/ResumePreview'
-import { ResumeEditor } from '@/components/resume/ResumeEditor'
-import { ComparisonView } from '@/components/resume/ComparisonView'
-import { WritingStyleSelector } from '@/components/resume/WritingStyleSelector'
-import { DetailSkeleton } from '@/components/ui/skeleton'
-import { ConfirmDialog } from '@/components/common/ConfirmDialog'
-import { ArrowLeft, FileSignature, Trash2, Pencil, Sparkles, Save, X, GitCompare } from 'lucide-react'
-import type { Resume, ResumeVersion } from '@/types'
-import type { WritingStyle } from '@/lib/writing-styles'
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { versionsApi } from "@/lib/api/versions";
+import { resumesApi } from "@/lib/api/resumes";
+import { aiApi } from "@/lib/api/ai";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { ResumePreview } from "@/components/resume/ResumePreview";
+import { ResumeEditor } from "@/components/resume/ResumeEditor";
+import { ComparisonView } from "@/components/resume/ComparisonView";
+import { WritingStyleSelector } from "@/components/resume/WritingStyleSelector";
+import { DetailSkeleton } from "@/components/ui/skeleton";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import {
+  ArrowLeft,
+  FileSignature,
+  Trash2,
+  Pencil,
+  Sparkles,
+  Save,
+  X,
+  GitCompare,
+} from "lucide-react";
+import type { Resume, ResumeVersion } from "@/types";
+import type { WritingStyle } from "@/lib/writing-styles";
 
 export function VersionDetailPage() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user, token } = useAuth()
-  const { toast } = useToast()
-  const [version, setVersion] = useState<ResumeVersion | null>(null)
-  const [resume, setResume] = useState<Resume | null>(null)
-  const [aiContent, setAiContent] = useState('')
-  const [coverLetter, setCoverLetter] = useState('')
-  const [generatingLetter, setGeneratingLetter] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [showComparison, setShowComparison] = useState(false)
-  const [showDelete, setShowDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [letterStyle, setLetterStyle] = useState<WritingStyle>('professional')
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, token } = useAuth();
+  const { toast } = useToast();
+  const [version, setVersion] = useState<ResumeVersion | null>(null);
+  const [resume, setResume] = useState<Resume | null>(null);
+  const [aiContent, setAiContent] = useState("");
+  const [coverLetter, setCoverLetter] = useState("");
+  const [generatingLetter, setGeneratingLetter] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showComparison, setShowComparison] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [letterStyle, setLetterStyle] = useState<WritingStyle>("professional");
 
-  const [editingResume, setEditingResume] = useState(false)
-  const [showRegenerateInput, setShowRegenerateInput] = useState(false)
-  const [regeneratePrompt, setRegeneratePrompt] = useState('')
-  const [regenerating, setRegenerating] = useState(false)
+  const [editingResume, setEditingResume] = useState(false);
+  const [showRegenerateInput, setShowRegenerateInput] = useState(false);
+  const [regeneratePrompt, setRegeneratePrompt] = useState("");
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenerateA4, setRegenerateA4] = useState(false);
 
-  const [editingLetter, setEditingLetter] = useState(false)
-  const [letterDraft, setLetterDraft] = useState('')
+  const [editingLetter, setEditingLetter] = useState(false);
+  const [letterDraft, setLetterDraft] = useState("");
 
   useEffect(() => {
-    if (!token || !id) return
-    versionsApi.getById(id, token)
+    if (!token || !id) return;
+    versionsApi
+      .getById(id, token)
       .then(async (v) => {
-        setVersion(v)
-        setAiContent(v.aiContent)
+        setVersion(v);
+        setAiContent(v.aiContent);
         if (v.resumeId) {
           try {
-            const r = await resumesApi.getById(v.resumeId, token)
-            setResume(r)
-          } catch { /* resume may have been deleted */ }
+            const r = await resumesApi.getById(v.resumeId, token);
+            setResume(r);
+          } catch {
+            /* resume may have been deleted */
+          }
         }
       })
-      .finally(() => setLoading(false))
-  }, [id, token])
+      .finally(() => setLoading(false));
+  }, [id, token]);
 
   const handleSaveEditedResume = async (editedContent: string) => {
-    setAiContent(editedContent)
-    setEditingResume(false)
+    setAiContent(editedContent);
+    setEditingResume(false);
     if (token && id) {
       try {
-        await versionsApi.update(id, { aiContent: editedContent }, token)
-        toast('Resume changes saved', 'success')
+        await versionsApi.update(id, { aiContent: editedContent }, token);
+        toast("Resume changes saved", "success");
       } catch {
-        toast('Failed to persist changes', 'error')
+        toast("Failed to persist changes", "error");
       }
     }
-  }
+  };
 
   const handleRegenerateResume = async () => {
-    if (!token || !id || !version || !resume) return
-    setRegenerating(true)
+    if (!token || !id || !version || !resume) return;
+    setRegenerating(true);
     try {
-      const result = await aiApi.fitResume({
-        resumeId: version.resumeId,
-        jobDescription: version.jobDescription,
-        customInstructions: regeneratePrompt || undefined,
-      }, token)
-      setAiContent(result.aiContent)
-      setShowRegenerateInput(false)
-      setRegeneratePrompt('')
-      toast('Resume regenerated', 'success')
+      const result = await aiApi.fitResume(
+        {
+          resumeId: version.resumeId,
+          jobDescription: version.jobDescription,
+          customInstructions: regeneratePrompt || undefined,
+          a4Optimized: regenerateA4,
+        },
+        token,
+      );
+      setAiContent(result.aiContent);
+      setShowRegenerateInput(false);
+      setRegeneratePrompt("");
+      toast("Resume regenerated", "success");
     } catch {
-      toast('Regeneration failed', 'error')
+      toast("Regeneration failed", "error");
     } finally {
-      setRegenerating(false)
+      setRegenerating(false);
     }
-  }
+  };
 
   const handleGenerateCoverLetter = async () => {
-    if (!token || !version) return
-    setGeneratingLetter(true)
+    if (!token || !version) return;
+    setGeneratingLetter(true);
     try {
-      const result = await aiApi.generateCoverLetter({
-        resumeContent: aiContent,
-        jobDescription: version.jobDescription,
-        company: version.company,
-        jobTitle: version.jobTitle,
-        style: letterStyle,
-      }, token)
-      const body = result.content.trim()
-      const signature = `\n\nSincerely,\n${user?.name || 'Applicant'}`
-      setCoverLetter(body + signature)
-      toast('Cover letter generated', 'success')
+      const result = await aiApi.generateCoverLetter(
+        {
+          resumeContent: aiContent,
+          jobDescription: version.jobDescription,
+          company: version.company,
+          jobTitle: version.jobTitle,
+          style: letterStyle,
+        },
+        token,
+      );
+      const body = result.content.trim();
+      const signature = `\n\nSincerely,\n${user?.name || "Applicant"}`;
+      setCoverLetter(body + signature);
+      toast("Cover letter generated", "success");
     } catch {
-      toast('Failed to generate cover letter', 'error')
+      toast("Failed to generate cover letter", "error");
     } finally {
-      setGeneratingLetter(false)
+      setGeneratingLetter(false);
     }
-  }
+  };
 
   const handleSaveEditedLetter = () => {
-    setCoverLetter(letterDraft)
-    setEditingLetter(false)
-    toast('Cover letter updated', 'success')
-  }
+    setCoverLetter(letterDraft);
+    setEditingLetter(false);
+    toast("Cover letter updated", "success");
+  };
 
   const handleDelete = async () => {
-    if (!token || !id) return
-    setDeleting(true)
+    if (!token || !id) return;
+    setDeleting(true);
     try {
-      await versionsApi.delete(id, token)
-      toast('Version deleted', 'success')
-      navigate('/versions')
+      await versionsApi.delete(id, token);
+      toast("Version deleted", "success");
+      navigate("/versions");
     } catch {
-      toast('Failed to delete version', 'error')
-      setDeleting(false)
-      setShowDelete(false)
+      toast("Failed to delete version", "error");
+      setDeleting(false);
+      setShowDelete(false);
     }
-  }
+  };
 
   const handleCopyLetter = async () => {
-    if (!coverLetter) return
+    if (!coverLetter) return;
     try {
-      await navigator.clipboard.writeText(coverLetter)
-      toast('Cover letter copied', 'success')
+      await navigator.clipboard.writeText(coverLetter);
+      toast("Cover letter copied", "success");
     } catch {
-      const ta = document.createElement('textarea')
-      ta.value = coverLetter
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-      toast('Cover letter copied', 'success')
+      const ta = document.createElement("textarea");
+      ta.value = coverLetter;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      toast("Cover letter copied", "success");
     }
-  }
+  };
 
-  if (loading) return <DetailSkeleton />
+  if (loading) return <DetailSkeleton />;
 
   if (!version) {
-    return <div className="text-center py-12 text-muted-foreground">Version not found</div>
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Version not found
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/versions')} className="shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/versions")}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold truncate">{version.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">
+              {version.name}
+            </h1>
             <p className="text-muted-foreground truncate">
               {version.company} &middot; {resume?.title || version.jobTitle}
             </p>
           </div>
         </div>
-        <Button variant="destructive" size="icon" onClick={() => setShowDelete(true)} className="shrink-0">
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={() => setShowDelete(true)}
+          className="shrink-0"
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -192,7 +228,7 @@ export function VersionDetailPage() {
           </CardHeader>
           <CardContent>
             <pre className="whitespace-pre-wrap text-sm text-muted-foreground">
-              {resume?.parsedContent ?? 'Resume data not available'}
+              {resume?.parsedContent ?? "Resume data not available"}
             </pre>
           </CardContent>
         </Card>
@@ -206,12 +242,13 @@ export function VersionDetailPage() {
         />
       ) : (
         <>
-          <ResumePreview
-            content={aiContent}
-            filename={version.name}
-          />
+          <ResumePreview content={aiContent} filename={version.name} />
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" size="sm" onClick={() => setEditingResume(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingResume(true)}
+            >
               <Pencil className="mr-1 h-4 w-4" />
               Edit Resume
             </Button>
@@ -236,11 +273,40 @@ export function VersionDetailPage() {
                   placeholder="e.g. Emphasize my leadership experience, use more action verbs..."
                   className="min-h-[80px]"
                 />
+                <label className="flex items-start gap-3 rounded-md border p-3 cursor-pointer hover:bg-accent transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={regenerateA4}
+                    onChange={(e) => setRegenerateA4(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-medium leading-none">
+                      A4 Optimized (Single Page)
+                    </span>
+                    <p className="text-xs text-muted-foreground">
+                      Produces ultra-concise bullet points that fit exactly one
+                      A4 page.
+                    </p>
+                  </div>
+                </label>
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={handleRegenerateResume} disabled={regenerating}>
-                    {regenerating ? 'Regenerating...' : 'Regenerate'}
+                  <Button
+                    size="sm"
+                    onClick={handleRegenerateResume}
+                    disabled={regenerating}
+                  >
+                    {regenerating ? "Regenerating..." : "Regenerate"}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { setShowRegenerateInput(false); setRegeneratePrompt('') }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowRegenerateInput(false);
+                      setRegeneratePrompt("");
+                      setRegenerateA4(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -255,18 +321,29 @@ export function VersionDetailPage() {
           <CardTitle className="text-base">Cover Letter Style</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <WritingStyleSelector value={letterStyle} onChange={setLetterStyle} disabled={generatingLetter} />
+          <WritingStyleSelector
+            value={letterStyle}
+            onChange={setLetterStyle}
+            disabled={generatingLetter}
+          />
           <div className="flex gap-3">
             {!coverLetter ? (
-              <Button onClick={handleGenerateCoverLetter} disabled={generatingLetter}>
+              <Button
+                onClick={handleGenerateCoverLetter}
+                disabled={generatingLetter}
+              >
                 <FileSignature className="mr-2 h-4 w-4" />
-                {generatingLetter ? 'Generating...' : 'Generate Cover Letter'}
+                {generatingLetter ? "Generating..." : "Generate Cover Letter"}
               </Button>
             ) : (
               <>
-                <Button variant="secondary" onClick={handleGenerateCoverLetter} disabled={generatingLetter}>
+                <Button
+                  variant="secondary"
+                  onClick={handleGenerateCoverLetter}
+                  disabled={generatingLetter}
+                >
                   <FileSignature className="mr-2 h-4 w-4" />
-                  {generatingLetter ? 'Generating...' : 'Regenerate'}
+                  {generatingLetter ? "Generating..." : "Regenerate"}
                 </Button>
                 <Button variant="outline" onClick={handleCopyLetter}>
                   Copy Letter
@@ -284,19 +361,45 @@ export function VersionDetailPage() {
             <div className="flex gap-1 shrink-0">
               {editingLetter ? (
                 <>
-                  <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={() => { setEditingLetter(false); setLetterDraft(coverLetter) }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-destructive"
+                    onClick={() => {
+                      setEditingLetter(false);
+                      setLetterDraft(coverLetter);
+                    }}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleSaveEditedLetter}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={handleSaveEditedLetter}
+                  >
                     <Save className="h-4 w-4" />
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => { setLetterDraft(coverLetter); setEditingLetter(true) }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => {
+                      setLetterDraft(coverLetter);
+                      setEditingLetter(true);
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setCoverLetter('')}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => setCoverLetter("")}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </>
@@ -331,11 +434,18 @@ export function VersionDetailPage() {
 
           {showComparison && (
             <>
-              <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setShowComparison(false)} />
+              <div
+                className="fixed w-full min-h-screen bg-black/90 z-40 top-0 left-0"
+                onClick={() => setShowComparison(false)}
+              />
               <div className="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-full max-w-4xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-card p-6 shadow-lg">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Resume Comparison</h2>
-                  <Button variant="ghost" size="icon" onClick={() => setShowComparison(false)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowComparison(false)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -359,5 +469,5 @@ export function VersionDetailPage() {
         loading={deleting}
       />
     </div>
-  )
+  );
 }

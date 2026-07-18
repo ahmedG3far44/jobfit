@@ -84,14 +84,14 @@ function buildDocx(content: string): Document {
 
 export const exportPdf = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { content, filename, template } = req.body;
+    const { content, filename, template, user } = req.body;
     if (!content) {
       res.status(400).json({ error: 'Content is required' });
       return;
     }
 
     const safeName = sanitizeFilename(filename);
-    const pdfBuffer = await generatePdf(content, (template || 'minimal') as PdfTemplate);
+    const pdfBuffer = await generatePdf(content, (template || 'minimal') as PdfTemplate, user);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${safeName}.pdf"`);

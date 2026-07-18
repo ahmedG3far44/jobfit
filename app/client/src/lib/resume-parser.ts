@@ -87,3 +87,87 @@ export function computeKeywordMatchScore(content: string, jobDescription: string
   const matched = keywords.filter((kw) => contentLower.includes(kw))
   return Math.round((matched.length / keywords.length) * 100)
 }
+
+function escapeLatex(text: string): string {
+  return text
+    .replace(/~/g, '\\textasciitilde{}')
+    .replace(/\^/g, '\\^{}')
+    .replace(/_/g, '\\_')
+    .replace(/&/g, '\\&')
+    .replace(/#/g, '\\#')
+    .replace(/\$/g, '\\$')
+    .replace(/%/g, '\\%')
+    .replace(/[{}]/g, (m) => m === '{' ? '\\{' : '\\}')
+    .replace(/\\/g, '\\textbackslash{}')
+}
+
+export function toLatex(
+  content: string,
+  user?: { name?: string; phone?: string; email?: string; contacts?: { type: string; value: string }[]; globalLocation?: string; localLocation?: string }
+): string {
+  const parsed = parseResume(content)
+  const sections = parsed.sections.filter((s) => s.content.trim() && s.name !== 'Contact')
+
+  const contactLabelMap: Record<string, string> = { linkedin: 'LinkedIn', github: 'GitHub', portfolio: 'Portfolio', behance: 'Behance', other: 'Link' }
+
+  const lines: string[] = []
+  lines.push('\\documentclass[11pt]{article}')
+  lines.push('\\usepackage[letterpaper,margin=0.75in]{geometry}')
+  lines.push('\\usepackage{enumitem}')
+  lines.push('\\usepackage{hyperref}')
+  lines.push('\\pagestyle{empty}')
+  lines.push('\\setlength{\\parindent}{0pt}')
+  lines.push('\\setlength{\\parskip}{4pt}')
+  lines.push('')
+  lines.push('\\begin{document}')
+  lines.push('')
+
+  if (user?.name) {
+    const locationParts: string[] = []
+    if (user.localLocation) locationParts.push(user.localLocation)
+    if (user.globalLocation) locationParts.push(user.globalLocation)
+
+    const linkLabels = (user.contacts ?? []).filter((c) => c.value).map((c) => contactLabelMap[c.type] || c.type)
+
+    const contactParts: string[] = []
+    if (locationParts.length > 0) contactParts.push(locationParts.join(', '))
+    if (user.phone) contactParts.push(user.phone)
+    if (user.email) contactParts.push(user.email)
+    contactParts.push(...linkLabels)
+
+    lines.push(`\\begin{center}`)
+    lines.push(`{\\huge \\textbf{${escapeLatex(user.name)}}}`)
+    if (contactParts.length > 0) {
+      lines.push(`\\\\[4pt]`)
+      lines.push(`{\\small ${contactParts.join(' $|$ ')}}`)
+    }
+    lines.push(`\\end{center}`)
+    lines.push('')
+    lines.push('\\vspace{4pt}')
+    lines.push('\\hrule')
+    lines.push('\\vspace{6pt}')
+    lines.push('')
+  }
+
+  for (const section of sections) {
+    lines.push(`\\section*{${escapeLatex(section.name)}}`)
+    const paragraphLines = section.content.split('\n').filter((l) => l.trim())
+    const regularLines = paragraphLines.filter((p) => !p.startsWith('- ') && !p.startsWith('• '))
+    const bulletLines = paragraphLines.filter((p) => p.startsWith('- ') || p.startsWith('• ')).map((p) => p.replace(/^[-•]\s*/, ''))
+
+    for (const line of regularLines) {
+      lines.push(escapeLatex(line))
+    }
+    if (bulletLines.length > 0) {
+      lines.push('\\begin{itemize}[leftmargin=*,nosep]')
+      for (const bl of bulletLines) {
+        lines.push(`  \\item ${escapeLatex(bl)}`)
+      }
+      lines.push('\\end{itemize}')
+    }
+    lines.push('')
+  }
+
+  lines.push('\\end{document}')
+  return lines.join('\n')
+}

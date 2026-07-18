@@ -34,7 +34,7 @@ Rules:
 4. Reference specific relevant experience from the resume.
 5. Keep it concise (3-4 paragraphs).
 6. Do NOT include phone numbers, email addresses, URLs, or any contact information.
-7. Do NOT include a closing signature at the end.
+7. Start with "Dear Hiring Manager," as the salutation.
 
 Resume:
 ${resumeContent}
@@ -45,7 +45,7 @@ ${jobDescription}
 Company: ${company}
 Job Title: ${jobTitle}
 
-Write only the body paragraphs. Do not add a salutation like "Dear" or a closing like "Sincerely" or your name.`;
+Write the full cover letter starting with "Dear Hiring Manager," followed by the body paragraphs. Do not include a closing signature.`;
 
   return callOpenRouter(prompt);
 };

@@ -124,19 +124,13 @@ export function CoverLettersPage() {
             <FileSignature className="mx-auto h-8 w-8 mb-3" />
             <p>No cover letters yet</p>
             <p className="text-sm mt-1">Create a resume version first, then generate a cover letter from it.</p>
+            <Button variant="outline" className="mt-4" onClick={() => navigate('/versions')}>
+              Browse Versions
+            </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {versionsWithLetters.length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <p>No cover letters generated yet</p>
-                <p className="text-sm mt-1">Select a style below and generate a cover letter for any version.</p>
-              </CardContent>
-            </Card>
-          )}
-
           {versionsWithLetters.map((version) => {
             const key = version._id
             const letter = coverLetters[key]
@@ -239,14 +233,6 @@ export function CoverLettersPage() {
               </Card>
             )
           })}
-
-          {versions.length > versionsWithLetters.length && (
-            <div className="text-center py-6">
-              <Button variant="outline" onClick={() => navigate('/versions')}>
-                Browse Versions
-              </Button>
-            </div>
-          )}
 
           {versions.map((v) => {
             const key = v._id

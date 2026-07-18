@@ -90,7 +90,11 @@ function parseSections(text: string): Section[] {
   }));
 }
 
-export function generatePdf(content: string, templateKey: PdfTemplate = 'minimal'): Promise<Buffer> {
+export function generatePdf(
+  content: string,
+  templateKey: PdfTemplate = 'minimal',
+  user?: { name?: string; phone?: string; email?: string; contacts?: { type: string; value: string }[]; globalLocation?: string; localLocation?: string }
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const style = TEMPLATES[templateKey] || TEMPLATES.minimal;
     const sections = parseSections(content);
@@ -107,49 +111,62 @@ export function generatePdf(content: string, templateKey: PdfTemplate = 'minimal
 
     doc.font(style.font);
 
-    if (sections.length === 0) {
+    // Render user contact header
+    if (user?.name) {
+      const boldFont = style.font === 'Helvetica' ? 'Helvetica-Bold' : style.font === 'Times-Roman' ? 'Times-Bold' : style.font;
+      doc.fontSize(style.headerSize).font(boldFont);
+      doc.fillColor('#000000').text(user.name, { align: 'left' });
+      doc.moveDown(0.3);
+
+      const locationParts: string[] = [];
+      if (user.localLocation) locationParts.push(user.localLocation);
+      if (user.globalLocation) locationParts.push(user.globalLocation);
+
+      const contactLabelMap: Record<string, string> = { linkedin: 'LinkedIn', github: 'GitHub', portfolio: 'Portfolio', behance: 'Behance', other: 'Link' };
+
+      const hasLocation = locationParts.length > 0;
+      const hasPhone = !!user.phone;
+      const hasEmail = !!user.email;
+      const links = (user.contacts ?? []).filter((c) => c.value);
+      const hasLinks = links.length > 0;
+
+      doc.fontSize(style.bodySize - 1).font(style.font);
+
+      const textParts: { text: string; link?: string }[] = [];
+      if (hasLocation) textParts.push({ text: locationParts.join(', ') });
+      if (hasLocation && (hasPhone || hasEmail || hasLinks)) textParts.push({ text: ' · ' });
+      if (hasPhone) textParts.push({ text: user.phone! });
+      if (hasPhone && (hasEmail || hasLinks)) textParts.push({ text: ' · ' });
+      if (hasEmail) textParts.push({ text: user.email! });
+      if (hasEmail && hasLinks) textParts.push({ text: ' · ' });
+      for (let i = 0; i < links.length; i++) {
+        if (i > 0) textParts.push({ text: ' · ' });
+        textParts.push({ text: contactLabelMap[links[i].type] || links[i].type, link: links[i].value });
+      }
+
+      for (let i = 0; i < textParts.length; i++) {
+        const part = textParts[i];
+        const isLast = i === textParts.length - 1;
+        if (part.link) {
+          doc.fillColor('#2563eb');
+          doc.text(part.text, { link: part.link, underline: true, continued: !isLast });
+          doc.fillColor('#4a4a4a');
+        } else {
+          doc.fillColor('#4a4a4a');
+          doc.text(part.text, { continued: !isLast });
+        }
+      }
+
+      doc.moveDown(1);
+    }
+
+    const nonContactSections = sections.filter((s) => s.name !== 'Contact');
+
+    if (nonContactSections.length === 0 && !user?.name) {
       doc.fontSize(style.bodySize).text(content, { lineGap: 2 });
     } else {
-      for (let i = 0; i < sections.length; i++) {
-        const section = sections[i];
-        const isContact = section.name === 'Contact';
-
-        if (isContact) {
-          const lines = section.content.split('\n').filter((l) => l.trim());
-          const nameLine = lines[0] || '';
-          const restLines = lines.slice(1);
-
-          if (nameLine) {
-            const boldFont = style.font === 'Helvetica' ? 'Helvetica-Bold' : style.font === 'Times-Roman' ? 'Times-Bold' : style.font;
-            doc.fontSize(style.headerSize).font(boldFont);
-            if (templateKey === 'modern') {
-              doc.fillColor('#2563eb').text(nameLine);
-            } else if (templateKey === 'classic') {
-              doc.fillColor('#000000').text(nameLine);
-            } else {
-              doc.fillColor('#000000').text(nameLine);
-            }
-            doc.moveDown(0.4);
-          }
-
-          if (restLines.length > 0) {
-            doc.fillColor('#000000').fontSize(style.bodySize).font(style.font);
-            for (const line of restLines) {
-              const urlMatch = line.match(/^(.+?):\s*(https?:\/\/.+)$/);
-              if (urlMatch) {
-                doc.text(urlMatch[1].trim(), { lineGap: 1 });
-              } else {
-                doc.text(line.trim(), { lineGap: 1 });
-              }
-              doc.moveDown(0.1);
-            }
-          }
-
-          if (i < sections.length - 1) {
-            doc.moveDown(1);
-          }
-          continue;
-        }
+      for (let i = 0; i < nonContactSections.length; i++) {
+        const section = nonContactSections[i];
 
         if (templateKey === 'modern') {
           doc.fillColor('#2563eb').fontSize(style.sectionTitleSize).font(style.font);
@@ -172,7 +189,7 @@ export function generatePdf(content: string, templateKey: PdfTemplate = 'minimal
           doc.moveDown(0.2);
         }
 
-        if (i < sections.length - 1) {
+        if (i < nonContactSections.length - 1) {
           doc.moveDown(0.5);
         }
       }

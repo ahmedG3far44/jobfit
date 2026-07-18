@@ -5,7 +5,7 @@ import { resumesApi } from '@/lib/api/resumes'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TableSkeleton } from '@/components/ui/skeleton'
-import { Plus, FileText } from 'lucide-react'
+import { Plus, FileText, GitBranch } from 'lucide-react'
 import type { Resume } from '@/types'
 
 export function ResumeListPage() {
@@ -65,9 +65,18 @@ export function ResumeListPage() {
                 <CardHeader>
                   <CardTitle className="text-lg truncate">{resume.title}</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-1.5">
                   <p className="text-sm text-muted-foreground">
                     Created {new Date(resume.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <GitBranch className="h-3 w-3 shrink-0" />
+                    <span>{resume.versionCount ?? 0} version{resume.versionCount !== 1 ? 's' : ''}</span>
+                    {(resume.versionCompanies ?? []).length > 0 && (
+                      <span className="truncate text-[10px] opacity-70">
+                        — {resume.versionCompanies!.join(', ')}
+                      </span>
+                    )}
                   </p>
                 </CardContent>
               </Card>
