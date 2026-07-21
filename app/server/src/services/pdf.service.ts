@@ -17,7 +17,7 @@ const TEMPLATES: Record<string, TemplateStyle> = {
     font: 'Helvetica',
     headerColor: '#1a1a1a',
     headerSize: 24,
-    sectionTitleSize: 13,
+    sectionTitleSize: 11,
     bodySize: 10,
     spacing: 14,
     lineHeight: 1.4,
@@ -27,7 +27,7 @@ const TEMPLATES: Record<string, TemplateStyle> = {
     font: 'Helvetica',
     headerColor: '#2563eb',
     headerSize: 26,
-    sectionTitleSize: 12,
+    sectionTitleSize: 11,
     bodySize: 10,
     spacing: 12,
     lineHeight: 1.45,
@@ -37,8 +37,8 @@ const TEMPLATES: Record<string, TemplateStyle> = {
     font: 'Times-Roman',
     headerColor: '#1a1a1a',
     headerSize: 22,
-    sectionTitleSize: 13,
-    bodySize: 11,
+    sectionTitleSize: 11,
+    bodySize: 10,
     spacing: 16,
     lineHeight: 1.5,
   },
@@ -48,7 +48,7 @@ const TEMPLATES: Record<string, TemplateStyle> = {
     headerColor: '#1a1a1a',
     headerSize: 20,
     sectionTitleSize: 11,
-    bodySize: 9,
+    bodySize: 10,
     spacing: 10,
     lineHeight: 1.3,
   },
@@ -111,9 +111,10 @@ export function generatePdf(
 
     doc.font(style.font);
 
+    const boldFont = style.font === 'Helvetica' ? 'Helvetica-Bold' : style.font === 'Times-Roman' ? 'Times-Bold' : style.font;
+
     // Render user contact header
     if (user?.name) {
-      const boldFont = style.font === 'Helvetica' ? 'Helvetica-Bold' : style.font === 'Times-Roman' ? 'Times-Bold' : style.font;
       doc.fontSize(style.headerSize).font(boldFont);
       doc.fillColor('#000000').text(user.name, { align: 'left' });
       doc.moveDown(0.3);
@@ -169,16 +170,16 @@ export function generatePdf(
         const section = nonContactSections[i];
 
         if (templateKey === 'modern') {
-          doc.fillColor('#2563eb').fontSize(style.sectionTitleSize).font(style.font);
+          doc.fillColor('#2563eb').fontSize(style.sectionTitleSize).font(boldFont);
           doc.text(section.name.toUpperCase(), { underline: false });
           doc.fillColor('#000000').fontSize(style.bodySize);
         } else if (templateKey === 'classic') {
-          doc.fillColor('#000000').fontSize(style.sectionTitleSize).font(style.font);
+          doc.fillColor('#000000').fontSize(style.sectionTitleSize).font(boldFont);
           doc.text(section.name.toUpperCase(), { underline: true });
           doc.moveDown(0.3);
           doc.fillColor('#000000').fontSize(style.bodySize);
         } else {
-          doc.fillColor('#000000').fontSize(style.sectionTitleSize).font(style.font);
+          doc.fillColor('#000000').fontSize(style.sectionTitleSize).font(boldFont);
           doc.text(section.name.toUpperCase());
           doc.fillColor('#000000').fontSize(style.bodySize);
         }

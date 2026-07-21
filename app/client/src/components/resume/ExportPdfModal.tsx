@@ -15,7 +15,7 @@ const TEMPLATES: { key: PdfTemplate; name: string; desc: string; style: string; 
     desc: 'Clean Helvetica layout with simple section headers.',
     style: 'font-sans text-gray-900',
     sectionClass: 'font-bold uppercase tracking-wider text-[11px] border-b border-gray-300 pb-0.5 mb-1.5 text-gray-800',
-    bodyClass: 'text-[11px] leading-relaxed',
+    bodyClass: 'text-[10px] leading-relaxed',
   },
   {
     key: 'modern',
@@ -23,7 +23,7 @@ const TEMPLATES: { key: PdfTemplate; name: string; desc: string; style: string; 
     desc: 'Blue section headers for visual flair.',
     style: 'font-sans text-gray-900',
     sectionClass: 'font-bold uppercase tracking-wider text-[11px] text-blue-600 border-b border-blue-300 pb-0.5 mb-1.5',
-    bodyClass: 'text-[11px] leading-relaxed',
+    bodyClass: 'text-[10px] leading-relaxed',
   },
   {
     key: 'classic',
@@ -31,14 +31,14 @@ const TEMPLATES: { key: PdfTemplate; name: string; desc: string; style: string; 
     desc: 'Traditional Times New Roman with underlined titles.',
     style: 'font-serif text-gray-900',
     sectionClass: 'font-bold uppercase tracking-wider text-[11px] underline decoration-gray-400 pb-0.5 mb-1.5',
-    bodyClass: 'text-[11px] leading-relaxed',
+    bodyClass: 'text-[10px] leading-relaxed',
   },
   {
     key: 'compact',
     name: 'Compact',
     desc: 'Smaller fonts and tighter spacing for more content.',
     style: 'font-sans text-gray-900',
-    sectionClass: 'font-bold uppercase tracking-wider text-[10px] border-b border-gray-300 pb-0.5 mb-1 text-gray-700',
+    sectionClass: 'font-bold uppercase tracking-wider text-[11px] border-b border-gray-300 pb-0.5 mb-1 text-gray-700',
     bodyClass: 'text-[10px] leading-snug',
   },
 ]

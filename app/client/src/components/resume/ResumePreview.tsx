@@ -100,7 +100,7 @@ function A4PdfPreview({ content, user }: { content: string; user: Pick<User, 'na
 
   return (
     <div className="mx-auto bg-white shadow-lg border" style={{ aspectRatio: '1 / 1.414', maxHeight: '75vh' }}>
-      <div className="h-full w-full overflow-y-auto p-8" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '11px', lineHeight: '1.5' }}>
+      <div className="h-full w-full overflow-y-auto p-8" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '10px', lineHeight: '1.5' }}>
         {user?.name && (
           <div className="mb-4 pb-3 border-b border-gray-300">
             <div className="text-lg font-bold">{user.name}</div>
@@ -127,8 +127,8 @@ function A4PdfPreview({ content, user }: { content: string; user: Pick<User, 'na
         ) : (
           sections.map((s) => (
             <div key={s.name} className="mb-3 last:mb-0">
-              <div className="font-bold uppercase tracking-wider text-xs border-b border-gray-300 pb-0.5 mb-1.5 text-gray-800">{s.name}</div>
-              <div className="text-xs leading-relaxed">
+              <div className="font-bold uppercase tracking-wider text-[11px] border-b border-gray-300 pb-0.5 mb-1.5 text-gray-800">{s.name}</div>
+              <div className="text-[10px] leading-relaxed">
                 {s.content.split('\n').map((line, i) => (
                   <div key={i}>{line || '\u00A0'}</div>
                 ))}
