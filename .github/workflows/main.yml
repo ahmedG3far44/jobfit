@@ -1,0 +1,42 @@
+name: Deploy JobFit Server to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Execute remote deployment script via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            ENV_CONTENT=$(cat <<'EOF'
+            PORT=${{ secrets.PORT }}
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            OPENROUTER_MODEL=${{ secrets.OPENROUTER_MODEL }}
+            OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+            ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
+            EOF
+            )
+
+            /home/njerka/apps/deploy.sh \
+              --port 5001 \
+              --subdomain jobfit \
+              --domain njerka.xyz \
+              --git https://github.com/ahmedG3far44/jobfit.git \
+              --dir "./app/server" \
+              --env "$ENV_CONTENT"
